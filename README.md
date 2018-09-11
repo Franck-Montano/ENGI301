@@ -1,2 +1,2 @@
 # ENGI301
-Repository for Fall 2018s ENGI 301 class. 
+Repository for ENGI301 course work. 
