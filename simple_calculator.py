@@ -100,6 +100,13 @@ def exponentiate(x, y):
 # Main script
 # ------------------------------------------------------------------------
 
+# Bind input to try_input so code works on Python 2
+try:
+   input = raw_input
+except NameError:
+   pass
+
+# Print operator options
 print("Select operation.")
 print("1.Add")
 print("2.Subtract")
@@ -111,13 +118,16 @@ print("7.Modulo")
 print("8.Exponentiate")
 print("Q.Close Calculator")
 
-# Take input from the user 
+# Loop until user is done
 while True:
+    # Take input from the user 
     choice = input("Enter choice(1/2/3/4/5/6/7/8/Q):")
     
+    # Exit the program
     if choice == 'Q':
         break
 
+    # Take numeric input
     num1 = int(input("Enter first number: "))
     num2 = int(input("Enter second number: "))
 
