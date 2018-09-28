@@ -51,6 +51,7 @@ Error conditions:
 
 --------------------------------------------------------------------------
 """
+import operator
 
 # ------------------------------------------------------------------------
 # Constants
@@ -60,103 +61,51 @@ Error conditions:
 # Global variables
 # ------------------------------------------------------------------------
 
+operators = {
+    "+"  : operator.add,
+    "-"  : operator.sub,
+    "*"  : operator.mul,
+    "/"  : operator.truediv, 
+    ">>" : operator.rshift,
+    "<<" : operator.lshift,
+    "%"  : operator.mod,
+    "**" : operator.pow
+}
+
 # ------------------------------------------------------------------------
 # Functions
 # ------------------------------------------------------------------------
 
-# This function adds two numbers 
-def add(x, y):
-   return x + y
+def get_user_input():
+    try:
+        number1 = int(input("Enter the first integer:  "))
+        number2 = int(input("Enter the second integer: "))
+        op      = input("Enter an operator (valid operators are +, -, *, /, >>, <<, %, and **): ")
 
-# This function subtracts two numbers 
-def subtract(x, y):
-   return x - y
-
-# This function multiplies two numbers
-def multiply(x, y):
-   return x * y
-
-# This function divides two numbers
-def divide(x, y):
-   return x / y
-
-# This function shifts a binary number to the right by y
-def right_shift(x, y):
-    return x >> y
-
-# This function shifts a binary number to the left by y
-def left_shift(x, y):
-    return x << y
-
-# This function calculates the modulo of two numbers
-def modulo(x, y):
-    return x % y
-
-# This function calculates an exponential 
-def exponentiate(x, y):
-    return x ** y
+        return (number1, number2, op)
+    except:
+        print("Invalid Input!")
+        return (None, None, None)
 
 # ------------------------------------------------------------------------
 # Main script
 # ------------------------------------------------------------------------
 
-# Bind input to try_input so code works on Python 2
-try:
-   input = raw_input
-except NameError:
-   pass
+if __name__ == "__main__":
 
-# Print operator options
-print("Select operation.")
-print("1.Add")
-print("2.Subtract")
-print("3.Multiply")
-print("4.Divide")
-print("5.Right Shift")
-print("6.Left Shift")
-print("7.Modulo")
-print("8.Exponentiate")
-print("Q.Close Calculator")
+    # Bind input to try_input so code works on Python 2
+    try:
+        input = raw_input
+    except NameError:
+        pass
 
-# Loop until user is done
-while True:
-    # Take input from the user 
-    choice = input("Enter choice(1/2/3/4/5/6/7/8/Q):")
-    
-    # Exit the program
-    if choice == 'Q':
-        break
+    while True:
+        (number1, number2, op) = get_user_input()
 
-    # Take numeric input
-    num1 = int(input("Enter first number: "))
-    num2 = int(input("Enter second number: "))
+        func = operators.get(op, None)    
 
-    if choice == '1':
-        print(num1,"+",num2,"=", add(num1,num2))
-        
-    elif choice == '2':
-        print(num1,"-",num2,"=", subtract(num1,num2))
-            
-    elif choice == '3':
-        print(num1,"*",num2,"=", multiply(num1,num2))
-                    
-    elif choice == '4':
-        print(num1,"/",num2,"=", divide(num1,num2))
-
-    elif choice == '5':
-        print(num1,">>",num2,"=", right_shift(num1,num2))
-
-    elif choice == '6':
-        print(num1,"<<",num2,"=", left_shift(num1,num2))
-
-    elif choice == '7':
-        print(num1,"%",num2,"=", modulo(num1,num2))
-
-    elif choice == '8':
-        print(num1,"^",num2,"=", exponentiate(num1,num2))
-
-    else:
-       print("Invalid input")
-       break
-
-#if __name__ == "__main__":pass
+        if (number1 is None) or (number2 is None) or (func is None):
+            print("Quitting.")
+            break
+        else:
+            print(func(number1, number2))
