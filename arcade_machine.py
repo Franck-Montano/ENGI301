@@ -326,12 +326,13 @@ def play_reflex(rand):
 # End def
 
 # ------------------------------------------------------------------------
-# Simon Says Class
+# Simon Says Code
 # ------------------------------------------------------------------------
 
 def play_simon_says():
     pattern = []
     user_input = []
+    score = 0
     playing_game = True
     
     while (playing_game):
@@ -341,8 +342,30 @@ def play_simon_says():
         for i in pattern:
             gpio_set(LEDS[pattern[i]], HIGH)
             time.sleep(0.5)
+            gpio_set(LEDS[pattern[i]], LOW)
+            time.sleep(0.5)
+            
+        while (len(user_input) < len(pattern)):   # Wait until any button is pressed
+            if (BUTTON0 == 1):
+                user_input.append(0)
+            if (BUTTON1 == 1):
+                user_input.append(1)
+            if (BUTTON2 == 1):
+                user_input.append(2)
+            if (BUTTON3 == 1):
+                user_input.append(3)
+        
+        for i in pattern:
+            for j in user_input:
+                if (pattern[i] != user_input[j]):
+                    playing_game = False  
+                    break
+                else:
+                    score += 1
+                    
+        
 
-# End class
+# End def
     
 # ------------------------------------------------------------------------
 # Main script
