@@ -299,6 +299,7 @@ def setup_game():
 def play_note(note, sec):
     PWM.start(BUZZER, 50, note)
     time.sleep(sec)
+    PWM.stop(BUZZER)
 
 # ------------------------------------------------------------------------
 # Reflex Tester Code
@@ -308,7 +309,7 @@ def play_reflex(rand):
     
     gpio_set(LED0, LOW) 
     gpio_set(LED1, LOW)
-    gpio_set(LED2, LOW)
+    #gpio_set(LED2, LOW)
     gpio_set(LED3, LOW)       
             
     time.sleep(random.random() * 6 + 3)      # Wait between 3 and 10 seconds before activating LED
@@ -351,8 +352,16 @@ def play_simon_says():
     score = 0
     playing_game = True
     
+    gpio_set(LED0, LOW) 
+    gpio_set(LED1, LOW)
+    gpio_set(LED2, LOW)
+    gpio_set(LED3, LOW) 
+    
     while (playing_game):
         rand = random.randint(0, 3)
+        while(rand == 1): #Ignore BUTTON1 (Damaged in original model)
+            rand = random.randint(0, 3)
+            
         #rand = random.randint(0, 1) * 3 # TESTING PURPOSES
         pattern.append(rand)
         print(pattern)
@@ -367,20 +376,28 @@ def play_simon_says():
             
         while (len(user_input) < len(pattern)):   # Wait until any button is pressed
             if (gpio_get(BUTTON0) == 0):
+                gpio_set(LED0, HIGH)
                 user_input.append(0)
-                time.sleep(0.75)
+                time.sleep(0.5)
+                gpio_set(LED0, LOW)
                 print("Button 0 accepts input") # TESTING 
-            elif (gpio_get(BUTTON1) == 0):
-                user_input.append(1)
-                time.sleep(0.75)
-                print("Button 1 accepts input") # TESTING 
+            #elif (gpio_get(BUTTON1) == 0):
+            #    gpio_set(LED1, HIGH)
+            #    user_input.append(1)
+            #    time.sleep(0.5)
+            #    gpio_set(LED1, LOW)
+            #    print("Button 1 accepts input") # TESTING 
             elif (gpio_get(BUTTON2) == 0): #Solved - Add SSH script (config-pin P2_18 gpio)
+                gpio_set(LED2, HIGH)
                 user_input.append(2)
-                time.sleep(0.75)
+                time.sleep(0.5)
+                gpio_set(LED2, LOW)
                 print("Button 2 accepts input") # TESTING 
             elif (gpio_get(BUTTON3) == 0):
+                gpio_set(LED3, HIGH)
                 user_input.append(3)
-                time.sleep(0.75)
+                time.sleep(0.5)
+                gpio_set(LED3, LOW)
                 print("Button 3 accepts input") # TESTING 
         
         for i in range(0, len(pattern)):
@@ -413,13 +430,13 @@ if __name__ == '__main__':
     while(playing):
     
         gpio_set(LED0, HIGH)
-        gpio_set(LED1, HIGH)
+        gpio_set(LED2, HIGH)
         
-        while ((gpio_get(BUTTON0) == 1) and (gpio_get(BUTTON1) == 1)):   # Wait until correct button is pressed
+        while ((gpio_get(BUTTON0) == 1) and (gpio_get(BUTTON2) == 1)):   # Wait until correct button is pressed
             pass
         
         if (gpio_get(BUTTON0) == 0):
-            gpio_set(LED1, LOW)
+            gpio_set(LED2, LOW)
             update_display(1)
             time.sleep(0.5)
             while (gpio_get(BUTTON0) == 1):
@@ -430,16 +447,20 @@ if __name__ == '__main__':
                 
             display_clear()
                 
-            play_reflex(random.randint(0, 3))
+            r = random.randint(0, 3) 
+            while (r == 1):                      #Ignore BUTTON1 (damaged in original model)
+                r = random.randint(0, 3)
+            
+            play_reflex(r)
             #play_reflex(1) # Testing
-        elif (gpio_get(BUTTON1) == 0):
+        elif (gpio_get(BUTTON2) == 0):
             update_display(2)
             gpio_set(LED0, LOW)
             time.sleep(0.5)
-            while (gpio_get(BUTTON1) == 1):
-                gpio_set(LED1, LOW)
+            while (gpio_get(BUTTON2) == 1):
+                gpio_set(LED2, LOW)
                 time.sleep(0.5)
-                gpio_set(LED1, HIGH)
+                gpio_set(LED2, HIGH)
                 time.sleep(0.5)
                 
             display_clear()
