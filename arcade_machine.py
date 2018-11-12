@@ -25,7 +25,7 @@ import Adafruit_BBIO.PWM as PWM
 # HT16K33 values
 DISPLAY_I2C_BUS              = 1                 # I2C 1  
 DISPLAY_I2C_ADDR             = 0x70
-DISPLAY_CMD                  = "i2cset -y 1 0x70"         
+DISPLAY_CMD                  = "/usr/sbin/i2cset -y 1 0x70"         
 
 # Peripheral path
 GPIO_BASE_PATH               = "/sys/class/gpio"
@@ -56,11 +56,7 @@ LEDS                         = [LED0, LED1, LED2, LED3]
 # Buzzer GPIO value
 BUZZER                       = "P2_1"           # gpio50 / (1, 18)
 
-# HT16K33 values
-DISPLAY_I2C_BUS              = 1                 # I2C 1  
-DISPLAY_I2C_ADDR             = 0x70
-DISPLAY_CMD                  = "i2cset -y 1 0x70"         
-
+NOTES                        =  [262, 329, 392, 529]
 
 # ------------------------------------------------------------------------
 # Global variables
@@ -299,7 +295,6 @@ def setup_game():
 def play_note(note, sec):
     PWM.start(BUZZER, 50, note)
     time.sleep(sec)
-    PWM.stop(BUZZER)
 
 # ------------------------------------------------------------------------
 # Reflex Tester Code
@@ -319,8 +314,6 @@ def play_reflex(rand):
     gpio_set(LEDS[rand], HIGH)              # Activate random LED
             
     initial_time = time.time()    
-    
-    print(gpio_get(BUTTONS[rand]))
     
     while (gpio_get(BUTTONS[rand]) == 1):   # Wait until correct button is pressed
         pass
@@ -357,18 +350,20 @@ def play_simon_says():
     gpio_set(LED2, LOW)
     gpio_set(LED3, LOW) 
     
+    time.sleep(1)
+    
     while (playing_game):
         rand = random.randint(0, 3)
         while(rand == 1): #Ignore BUTTON1 (Damaged in original model)
             rand = random.randint(0, 3)
             
-        #rand = random.randint(0, 1) * 3 # TESTING PURPOSES
         pattern.append(rand)
         print(pattern)
         
         for i in range(0, len(pattern)):
             gpio_set(LEDS[pattern[i]], HIGH)
-            time.sleep(0.5)
+            play_note(NOTES[pattern[i]], 0.5)
+            PWM.stop(BUZZER)
             gpio_set(LEDS[pattern[i]], LOW)
             time.sleep(0.5)
             
@@ -378,7 +373,8 @@ def play_simon_says():
             if (gpio_get(BUTTON0) == 0):
                 gpio_set(LED0, HIGH)
                 user_input.append(0)
-                time.sleep(0.5)
+                play_note(NOTES[0], 0.5)
+                PWM.stop(BUZZER)
                 gpio_set(LED0, LOW)
                 print("Button 0 accepts input") # TESTING 
             #elif (gpio_get(BUTTON1) == 0):
@@ -390,13 +386,15 @@ def play_simon_says():
             elif (gpio_get(BUTTON2) == 0): #Solved - Add SSH script (config-pin P2_18 gpio)
                 gpio_set(LED2, HIGH)
                 user_input.append(2)
-                time.sleep(0.5)
+                play_note(NOTES[2], 0.5)
+                PWM.stop(BUZZER)
                 gpio_set(LED2, LOW)
                 print("Button 2 accepts input") # TESTING 
             elif (gpio_get(BUTTON3) == 0):
                 gpio_set(LED3, HIGH)
                 user_input.append(3)
-                time.sleep(0.5)
+                play_note(NOTES[3], 0.5)
+                PWM.stop(BUZZER)
                 gpio_set(LED3, LOW)
                 print("Button 3 accepts input") # TESTING 
         
@@ -423,14 +421,25 @@ if __name__ == '__main__':
     
     setup_game()
     
-    play_note(262, 1)
+    play_note(NOTES[0], 0.25)    #Do
+    gpio_set(LED0, HIGH)
+    play_note(NOTES[1], 0.25)    #Mi
+    gpio_set(LED2, HIGH)
+    play_note(NOTES[2], 0.25)    #Sol
+    gpio_set(LED3, HIGH)
+    play_note(NOTES[3], 0.25)    #Do
+    PWM.stop(BUZZER)
+    
+    gpio_set(LED3, LOW)
     
     playing = True
     
     while(playing):
-    
+        
         gpio_set(LED0, HIGH)
         gpio_set(LED2, HIGH)
+            
+        confirm = 0
         
         while ((gpio_get(BUTTON0) == 1) and (gpio_get(BUTTON2) == 1)):   # Wait until correct button is pressed
             pass
@@ -439,20 +448,26 @@ if __name__ == '__main__':
             gpio_set(LED2, LOW)
             update_display(1)
             time.sleep(0.5)
+            
             while (gpio_get(BUTTON0) == 1):
                 gpio_set(LED0, LOW)
                 time.sleep(0.5)
                 gpio_set(LED0, HIGH)
                 time.sleep(0.5)
                 
+                confirm += 1
+                if (confirm >= 5):
+                    break
+            
             display_clear()
                 
             r = random.randint(0, 3) 
             while (r == 1):                      #Ignore BUTTON1 (damaged in original model)
                 r = random.randint(0, 3)
             
-            play_reflex(r)
-            #play_reflex(1) # Testing
+            if (confirm < 5):
+                play_reflex(r)
+            
         elif (gpio_get(BUTTON2) == 0):
             update_display(2)
             gpio_set(LED0, LOW)
@@ -463,17 +478,23 @@ if __name__ == '__main__':
                 gpio_set(LED2, HIGH)
                 time.sleep(0.5)
                 
+                confirm += 1
+                if (confirm >= 5):
+                    break
+            
             display_clear()
-            play_simon_says()
+            
+            if (confirm < 5):
+                play_simon_says()
         
-        for i in range(0, 4):
+        for i in range(0, 3):
             gpio_set(LED0, HIGH) 
-            gpio_set(LED1, HIGH)
+            #gpio_set(LED1, HIGH)
             gpio_set(LED2, HIGH)
             gpio_set(LED3, HIGH) 
             time.sleep(0.5)
             gpio_set(LED0, LOW) 
-            gpio_set(LED1, LOW)
+            #gpio_set(LED1, LOW)
             gpio_set(LED2, LOW)
             gpio_set(LED3, LOW) 
             time.sleep(0.5)
