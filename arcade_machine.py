@@ -295,20 +295,24 @@ def setup_game():
 # ------------------------------------------------------------------------
         
 def play_reflex(rand):
-    #playing_game = True
-        
-    #while (playing_game):
-        #self.random_path = random.randint(1, 4)
+    
+    gpio_set(LED0, LOW) 
+    gpio_set(LED1, LOW)
+    gpio_set(LED2, LOW)
+    gpio_set(LED3, LOW)       
             
     time.sleep(random.random() * 6 + 3)      # Wait between 3 and 10 seconds before activating LED
         
-    print(LEDS[rand])
+    print(rand)
         
     gpio_set(LEDS[rand], HIGH)              # Activate random LED
             
     initial_time = time.time()    
     
-    while (gpio_get(BUTTONS[rand]) == 1):   # Wait until correct button is pressed
+    while (gpio_get(BUTTONS[rand]) == 1 & rand != 2):   # Wait until correct button is pressed
+        pass
+    
+    while (gpio_get(BUTTONS[rand]) == 0 & rand == 2):   # Wait until correct button is pressed
         pass
     
     button_press_time = time.time() 
@@ -336,34 +340,47 @@ def play_simon_says():
     playing_game = True
     
     while (playing_game):
-        rand = random.randint(0, 3)
+        #rand = random.randint(0, 3)
+        rand = random.randint(0, 1) * 3 # TESTING PURPOSES
         pattern.append(rand)
+        print(pattern)
         
-        for i in pattern:
+        for i in range(0, len(pattern)):
             gpio_set(LEDS[pattern[i]], HIGH)
             time.sleep(0.5)
             gpio_set(LEDS[pattern[i]], LOW)
-            time.sleep(0.5)
+            time.sleep(0.75)
+            
+        print("LED lights up")
             
         while (len(user_input) < len(pattern)):   # Wait until any button is pressed
-            if (BUTTON0 == 1):
+            if (gpio_get(BUTTON0) == 0):
                 user_input.append(0)
-            if (BUTTON1 == 1):
+                time.sleep(0.75)
+                print("Button 0 accepts input") # TESTING 
+            elif (gpio_get(BUTTON1) == 0):
                 user_input.append(1)
-            if (BUTTON2 == 1):
+                time.sleep(0.75)
+                print("Button 1 accepts input") # TESTING 
+            elif (gpio_get(BUTTON2) == 1): # WEIRD - Check BUTTON2 wiring
                 user_input.append(2)
-            if (BUTTON3 == 1):
+                time.sleep(0.75)
+                print("Button 2 accepts input") # TESTING 
+            elif (gpio_get(BUTTON3) == 0):
                 user_input.append(3)
+                time.sleep(0.75)
+                print("Button 3 accepts input") # TESTING 
         
-        for i in pattern:
-            for j in user_input:
-                if (pattern[i] != user_input[j]):
-                    playing_game = False  
-                    break
-                else:
-                    score += 1
+        for i in range(0, len(pattern)):
+            if (pattern[i] != user_input[i]):
+                playing_game = False  
+                break
+            else:
+                score += 1
+                update_display(score)
+            
                     
-        
+        user_input[:] = []
 
 # End def
     
@@ -372,6 +389,57 @@ def play_simon_says():
 # ------------------------------------------------------------------------
         
 if __name__ == '__main__':
+    display_setup()
+    display_clear()
+    
     setup_game()
-    play_reflex(0)
+    
+    playing = True
+    
+    while(playing):
+    
+        gpio_set(LED0, HIGH)
+        gpio_set(LED1, HIGH)
+        
+        while ((gpio_get(BUTTON0) == 1) & (gpio_get(BUTTON1) == 1)):   # Wait until correct button is pressed
+            pass
+        
+        if (gpio_get(BUTTON0) == 0):
+            gpio_set(LED1, LOW)
+            update_display(1)
+            time.sleep(0.5)
+            while (gpio_get(BUTTON0) == 1):
+                gpio_set(LED0, LOW)
+                time.sleep(0.5)
+                gpio_set(LED0, HIGH)
+                time.sleep(0.5)
+                
+            #play_reflex(random.randint(0, 3))
+            display_clear()
+            play_reflex(0) # Testing
+        
+        if (gpio_get(BUTTON1) == 0):
+            update_display(2)
+            gpio_set(LED0, LOW)
+            time.sleep(0.5)
+            while (gpio_get(BUTTON1) == 1):
+                gpio_set(LED1, LOW)
+                time.sleep(0.5)
+                gpio_set(LED1, HIGH)
+                time.sleep(0.5)
+                
+            display_clear()
+            play_simon_says()
+        
+        for i in range(0, 4):
+            gpio_set(LED0, HIGH) 
+            gpio_set(LED1, HIGH)
+            gpio_set(LED2, HIGH)
+            gpio_set(LED3, HIGH) 
+            time.sleep(0.5)
+            gpio_set(LED0, LOW) 
+            gpio_set(LED1, LOW)
+            gpio_set(LED2, LOW)
+            gpio_set(LED3, LOW) 
+            time.sleep(0.5)
     
