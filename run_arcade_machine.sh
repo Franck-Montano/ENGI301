@@ -38,6 +38,7 @@
 # Reboot the PocketBeagle to then auto-run the program
 #
 # --------------------------------------------------------------------------
+cd /var/lib/cloud9/ENGI301/arcade_machine
 
 config-pin P2_18 gpio
 config-pin P2_1 pwm
