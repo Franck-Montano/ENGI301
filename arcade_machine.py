@@ -16,6 +16,8 @@ import os
 import random
 import time
 
+import Adafruit_BBIO.PWM as PWM
+
 # ------------------------------------------------------------------------
 # Global Constants
 # ------------------------------------------------------------------------
@@ -52,7 +54,7 @@ LED3                         = (1, 12)           # gpio44 / P2_24
 LEDS                         = [LED0, LED1, LED2, LED3]
   
 # Buzzer GPIO value
-BUZZER                       = (1, 18)           # gpio50 / P2_1
+BUZZER                       = "P2_1"           # gpio50 / (1, 18)
 
 # HT16K33 values
 DISPLAY_I2C_BUS              = 1                 # I2C 1  
@@ -286,9 +288,17 @@ def setup_game():
     gpio_setup(LED2, OUT, LOW)
     gpio_setup(LED3, OUT, LOW)
     
-    gpio_setup(BUZZER, OUT, LOW)
+    #gpio_setup(BUZZER, OUT, LOW)
         
     display_setup
+
+# ------------------------------------------------------------------------
+# Piezo Buzzer Code
+# ------------------------------------------------------------------------
+
+def play_note(note, sec):
+    PWM.start(BUZZER, 50, note)
+    time.sleep(sec)
 
 # ------------------------------------------------------------------------
 # Reflex Tester Code
@@ -309,11 +319,13 @@ def play_reflex(rand):
             
     initial_time = time.time()    
     
-    while (gpio_get(BUTTONS[rand]) == 1 & rand != 2):   # Wait until correct button is pressed
+    print(gpio_get(BUTTONS[rand]))
+    
+    while (gpio_get(BUTTONS[rand]) == 1):   # Wait until correct button is pressed
         pass
     
-    while (gpio_get(BUTTONS[rand]) == 0 & rand == 2):   # Wait until correct button is pressed
-        pass
+    #while (gpio_get(BUTTONS[rand]) == 0 and rand == 2):   # Wait until correct button is pressed
+    #    print("BUTTON1")
     
     button_press_time = time.time() 
     gpio_set(LEDS[rand], LOW)
@@ -340,8 +352,8 @@ def play_simon_says():
     playing_game = True
     
     while (playing_game):
-        #rand = random.randint(0, 3)
-        rand = random.randint(0, 1) * 3 # TESTING PURPOSES
+        rand = random.randint(0, 3)
+        #rand = random.randint(0, 1) * 3 # TESTING PURPOSES
         pattern.append(rand)
         print(pattern)
         
@@ -349,7 +361,7 @@ def play_simon_says():
             gpio_set(LEDS[pattern[i]], HIGH)
             time.sleep(0.5)
             gpio_set(LEDS[pattern[i]], LOW)
-            time.sleep(0.75)
+            time.sleep(0.5)
             
         print("LED lights up")
             
@@ -362,7 +374,7 @@ def play_simon_says():
                 user_input.append(1)
                 time.sleep(0.75)
                 print("Button 1 accepts input") # TESTING 
-            elif (gpio_get(BUTTON2) == 1): # WEIRD - Check BUTTON2 wiring
+            elif (gpio_get(BUTTON2) == 0): #Solved - Add SSH script (config-pin P2_18 gpio)
                 user_input.append(2)
                 time.sleep(0.75)
                 print("Button 2 accepts input") # TESTING 
@@ -394,6 +406,8 @@ if __name__ == '__main__':
     
     setup_game()
     
+    play_note(262, 1)
+    
     playing = True
     
     while(playing):
@@ -401,7 +415,7 @@ if __name__ == '__main__':
         gpio_set(LED0, HIGH)
         gpio_set(LED1, HIGH)
         
-        while ((gpio_get(BUTTON0) == 1) & (gpio_get(BUTTON1) == 1)):   # Wait until correct button is pressed
+        while ((gpio_get(BUTTON0) == 1) and (gpio_get(BUTTON1) == 1)):   # Wait until correct button is pressed
             pass
         
         if (gpio_get(BUTTON0) == 0):
@@ -414,11 +428,11 @@ if __name__ == '__main__':
                 gpio_set(LED0, HIGH)
                 time.sleep(0.5)
                 
-            #play_reflex(random.randint(0, 3))
             display_clear()
-            play_reflex(0) # Testing
-        
-        if (gpio_get(BUTTON1) == 0):
+                
+            play_reflex(random.randint(0, 3))
+            #play_reflex(1) # Testing
+        elif (gpio_get(BUTTON1) == 0):
             update_display(2)
             gpio_set(LED0, LOW)
             time.sleep(0.5)
