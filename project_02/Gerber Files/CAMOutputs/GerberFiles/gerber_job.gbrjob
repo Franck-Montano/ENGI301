@@ -1,0 +1,24 @@
+{
+    "Header": {
+        "Comment": "All values are metric (mm)",
+        "CreationDate": "2018-12-12T03:29:48Z",
+        "GenerationSoftware": {
+            "Application": "EAGLE",
+            "Vendor": "Autodesk",
+            "Version": "9.2.0"
+        },
+        "Part": "Single"
+    },
+    "Overall": {
+        "BoardThickness": 1.53,
+        "LayerNumber": 4,
+        "Name": {
+            "ProjectId": "ArcadeMachine"
+        },
+        "Owner": "Fdm3 Fdm3 <fdm3@rice.edu>",
+        "Size": {
+            "X": 69.85,
+            "Y": 114.3
+        }
+    }
+}
